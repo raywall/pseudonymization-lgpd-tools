@@ -1,0 +1,23 @@
+{
+	"PkgHandler": {
+		"Pattern": "/pseudonymization-lgpd-tools",
+		"StripPrefix": "/pseudonymization-lgpd-tools",
+		"Include": [
+			"/src/github.com/raywall/pseudonymization-lgpd-tools/*.go",
+			"/src/github.com/raywall/pseudonymization-lgpd-tools/utils/*.go",
+			"/src/github.com/raywall/pseudonymization-lgpd-tools/examples/*.go",
+		],
+		"Exclude": [
+			"/src/github.com/raywall/pseudonymization-lgpd-tools/*_test.go",
+			"/src/github.com/raywall/pseudonymization-lgpd-tools/utils/*_test.go",
+		],
+		"IgnoredSuffixes": [
+			"iface"
+		]
+	},
+	"Github": {
+		"Tag": "main",
+		"Repo": "/raywall/pseudonymization-lgpd-tools",
+		"UseGithub": true
+	}
+}
