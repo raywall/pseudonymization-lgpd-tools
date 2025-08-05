@@ -1,3 +1,6 @@
+// Package utils contém funções utilitárias que complementam o serviço de pseudonimização.
+// Eu iniciei este pacote com ferramentas específicas para o contexto brasileiro,
+// como a validação e geração de CPFs, que são dados pessoais frequentemente processados.
 package utils
 
 import (
@@ -5,77 +8,72 @@ import (
 	"fmt"
 )
 
-// IsValidCPF checks if a string is a valid CPF number according to Brazilian rules
-// It removes formatting characters and validates the check digits
+// IsValidCPF verifica se uma string corresponde a um número de CPF válido de acordo com
+// o algoritmo oficial do Brasil. Esta função remove caracteres de formatação
+// e valida os dígitos verificadores.
 //
-// Parameters:
-// - cpf: The CPF string to validate (can include formatting like . and -)
+// Parâmetros:
+//   - cpf: A string do CPF a ser validada (pode conter pontos e traço).
 //
-// Returns:
-// - bool: true if valid, false otherwise
+// Retorna:
+//   - bool: `true` se o CPF for válido, `false` caso contrário.
 func IsValidCPF(cpf string) bool {
-	// Remove all non-digit characters
+	// Remove todos os caracteres que não são dígitos.
 	cleaned := cleanCPF(cpf)
 
-	// Check length (must be 11 digits)
+	// Verifica o comprimento (deve ter 11 dígitos).
 	if len(cleaned) != 11 {
 		return false
 	}
 
-	// Check for invalid patterns (all digits same)
+	// Verifica padrões inválidos conhecidos (todos os dígitos iguais).
 	if allDigitsSame(cleaned) {
 		return false
 	}
 
-	// Calculate first check digit
+	// Calcula e compara os dígitos verificadores.
 	firstDigit := calculateCPFCheckDigit(cleaned[:9], 10)
-
-	// Calculate second check digit
 	secondDigit := calculateCPFCheckDigit(cleaned[:10], 11)
 
-	// Verify check digits
 	return cleaned[9] == firstDigit && cleaned[10] == secondDigit
 }
 
-// GenerateSyntheticCPF creates a valid synthetic CPF for testing purposes
-// The generated CPF follows the same validation rules as real CPFs but uses
-// a known prefix to indicate it's synthetic (prefix 999)
+// GenerateSyntheticCPF cria um número de CPF sintético, porém válido, para uso em testes.
+// O CPF gerado segue todas as regras de validação, mas eu o projetei para usar um prefixo
+// conhecido (999) para indicar que não é um CPF real.
 //
-// Returns:
-// - string: A valid synthetic CPF (with formatting)
-// - error: Only returns error if random number generation fails
+// Retorna:
+//   - string: Um CPF sintético válido e formatado.
+//   - error: Retorna um erro apenas se a geração de números aleatórios do sistema falhar.
 func GenerateSyntheticCPF() (string, error) {
-	// Use 999 as prefix to clearly identify synthetic CPFs
+	// Uso o prefixo 999 para identificar claramente CPFs sintéticos.
 	prefix := "999"
 
-	// Generate 6 random digits
+	// Gera 6 dígitos aleatórios para completar o corpo do CPF.
 	randomDigits := make([]byte, 6)
 	_, err := rand.Read(randomDigits)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate random digits: %w", err)
+		return "", fmt.Errorf("falha ao gerar dígitos aleatórios: %w", err)
 	}
 
-	// Convert to digits 0-9
 	for i := range randomDigits {
 		randomDigits[i] = '0' + (randomDigits[i] % 10)
 	}
 
-	// Combine prefix and random digits (9 digits total)
+	// Combina o prefixo e os dígitos aleatórios.
 	partialCPF := prefix + string(randomDigits)
 
-	// Calculate first check digit
+	// Calcula os dois dígitos verificadores.
 	firstDigit := calculateCPFCheckDigit(partialCPF, 10)
 	partialCPF += string(firstDigit)
-
-	// Calculate second check digit
 	secondDigit := calculateCPFCheckDigit(partialCPF, 11)
 	fullCPF := partialCPF + string(secondDigit)
 
-	// Format with standard CPF punctuation
+	// Formata o resultado final com a pontuação padrão.
 	return formatCPF(fullCPF), nil
 }
 
-// Helper function to calculate CPF check digit
+// calculateCPFCheckDigit é uma função auxiliar para calcular um dígito verificador do CPF.
 func calculateCPFCheckDigit(partialCPF string, weight int) byte {
 	var sum int
 	for _, c := range partialCPF {
@@ -90,7 +88,7 @@ func calculateCPFCheckDigit(partialCPF string, weight int) byte {
 	return byte('0' + (11 - remainder))
 }
 
-// Helper function to remove all non-digit characters from CPF
+// cleanCPF é uma função auxiliar para remover todos os caracteres não numéricos de uma string.
 func cleanCPF(cpf string) string {
 	var cleaned []rune
 	for _, c := range cpf {
@@ -101,7 +99,7 @@ func cleanCPF(cpf string) string {
 	return string(cleaned)
 }
 
-// Helper function to check if all digits are the same
+// allDigitsSame é uma função auxiliar para verificar se todos os dígitos da string são iguais.
 func allDigitsSame(cpf string) bool {
 	first := cpf[0]
 	for i := 1; i < len(cpf); i++ {
@@ -112,7 +110,7 @@ func allDigitsSame(cpf string) bool {
 	return true
 }
 
-// Helper function to format CPF with standard punctuation
+// formatCPF é uma função auxiliar para formatar um CPF de 11 dígitos com a pontuação padrão.
 func formatCPF(cpf string) string {
 	if len(cpf) != 11 {
 		return cpf
